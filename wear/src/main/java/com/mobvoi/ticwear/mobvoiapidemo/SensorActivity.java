@@ -34,6 +34,7 @@ public class SensorActivity extends Activity implements  SensorEventListener {
     private Sensor mGravity;
     private Sensor mGyroscope;
     private Sensor mMagnet;
+    private Sensor mLinearAccelerometer;
     String filenme = "SensorData.txt";
     Handler myHandler;
     TextView txtValue;
@@ -54,6 +55,8 @@ public class SensorActivity extends Activity implements  SensorEventListener {
         mGravity = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
         mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mMagnet = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        mLinearAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+
 
         myHandler = new MyHandler();
         txtValue = (TextView)findViewById(R.id.value);
@@ -72,6 +75,7 @@ public class SensorActivity extends Activity implements  SensorEventListener {
         mSensorManager.registerListener(this,mGravity,SensorManager.SENSOR_DELAY_GAME);
         mSensorManager.registerListener(this,mGyroscope,SensorManager.SENSOR_DELAY_GAME);
         mSensorManager.registerListener(this,mMagnet,SensorManager.SENSOR_DELAY_GAME);
+        mSensorManager.registerListener(this,mLinearAccelerometer, SensorManager.SENSOR_DELAY_GAME);
         try {
             fout =openFileOutput(filenme,MODE_PRIVATE);
         } catch (IOException e) {
@@ -118,6 +122,11 @@ public class SensorActivity extends Activity implements  SensorEventListener {
                 y = event.values[1];
                 z = event.values[2];
                 break;
+            case Sensor.TYPE_LINEAR_ACCELERATION:
+                x = event.values[0];
+                y = event.values[1];
+                z = event.values[2];
+                break;
             default:
                 return;
         }
@@ -126,7 +135,7 @@ public class SensorActivity extends Activity implements  SensorEventListener {
             fout.write(message.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(getApplicationContext(),"write "+filenme + " failed",Toast.LENGTH_SHORT);
+            Toast.makeText(getApplicationContext(),"write "+filenme + " failed",Toast.LENGTH_SHORT).show();
         }
         Log.e("message",message);
 

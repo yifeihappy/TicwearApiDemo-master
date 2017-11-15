@@ -1,6 +1,8 @@
 package com.mobvoi.ticwear.mobvoiapidemo;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.IpPrefix;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,10 +32,12 @@ public class SendDataActivity extends Activity {
     private Button sendButton;
     private EditText IPedt;
     String filename = "SensorData.txt";
-    private String HOST = "192.168.0.152";//computer IP
+    private String HOST = null;//computer IP
     private int PORT = 5000; //server PORT,the same to server
     private final int SEND_ERROR = 1;
     private final int SEND_SUCCESS = 0;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
 
     Handler myHandler = new MyHandler();
 
@@ -57,14 +61,21 @@ public class SendDataActivity extends Activity {
         setContentView(R.layout.round_activity_send_data);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//?
 
+        sharedPreferences = getSharedPreferences("HOSTIP", Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+        HOST = sharedPreferences.getString("IP", "192.168.10.0");
+
         IPedt = (EditText)findViewById(R.id.IPedt);
         sendButton = (Button)findViewById(R.id.sendbutton);
+        IPedt.setText(HOST);
 
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //Toast.makeText(getApplicationContext(),"Hahahaha",Toast.LENGTH_SHORT).show();
                 HOST = IPedt.getText().toString();
+                editor.putString("IP",HOST);
+                editor.commit();
                 String buffer = readData(filename);
                 //Log.e("Test",buffer);
                 new ClientThread(buffer).start();
