@@ -123,6 +123,7 @@ public class SendDataActivity extends Activity {
         public void run() {
             socket = new Socket();
             Message msg = Message.obtain();
+            msg.what = SEND_SUCCESS;
             try {
                 socket.connect(new InetSocketAddress(HOST,PORT),5000);
                 output = new PrintStream(socket.getOutputStream());
@@ -133,7 +134,7 @@ public class SendDataActivity extends Activity {
                 e.printStackTrace();
                 msg.what = SEND_ERROR;
             }
-            msg.what = SEND_SUCCESS;
+
             myHandler.sendMessage(msg);
 
         }
