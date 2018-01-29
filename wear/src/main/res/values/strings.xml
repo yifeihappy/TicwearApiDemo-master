@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MobvoiApiDemo</string>
+    <string name="app_name">OfflineSensorData</string>
     <string name="intro">Waiting for data to arrive\u2026</string>
     <string name="intro1">Sensors\u2026</string>
     <string name="title_activity_sensor">SensorActivity</string>

@@ -33,7 +33,7 @@ public class SendDataActivity extends Activity {
     private EditText IPedt;
     String filename = "SensorData.txt";
     private String HOST = null;//computer IP
-    private int PORT = 5000; //server PORT,the same to server
+    private int PORT = 5100; //server PORT,the same to server
     private final int SEND_ERROR = 1;
     private final int SEND_SUCCESS = 0;
     SharedPreferences sharedPreferences;

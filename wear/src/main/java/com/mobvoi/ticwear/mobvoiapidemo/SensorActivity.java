@@ -35,9 +35,16 @@ public class SensorActivity extends Activity implements  SensorEventListener {
     private Sensor mGyroscope;
     private Sensor mMagnet;
     private Sensor mLinearAccelerometer;
+    private Sensor mOrientation;
     String filenme = "SensorData.txt";
     Handler myHandler;
     TextView txtValue;
+    float[] accelerometerValues = new float[3];
+    float[] magneticFieldValues = new float[3];
+    float[] gravityValues = new float[3];
+    float[] linearAccelerometerValues = new float[3];
+    float[] orientationValues = new float[3];
+
 //    private String HOST = "192.168.0.152";//computer IP
 //    private int PORT = 5000; //server PORT,the same to server
 //    private String buffer;
@@ -56,7 +63,7 @@ public class SensorActivity extends Activity implements  SensorEventListener {
         mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mMagnet = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         mLinearAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-
+        mOrientation = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 
         myHandler = new MyHandler();
         txtValue = (TextView)findViewById(R.id.value);
@@ -76,6 +83,8 @@ public class SensorActivity extends Activity implements  SensorEventListener {
         mSensorManager.registerListener(this,mGyroscope,SensorManager.SENSOR_DELAY_GAME);
         mSensorManager.registerListener(this,mMagnet,SensorManager.SENSOR_DELAY_GAME);
         mSensorManager.registerListener(this,mLinearAccelerometer, SensorManager.SENSOR_DELAY_GAME);
+        mSensorManager.registerListener(this,mOrientation, SensorManager.SENSOR_DELAY_GAME);
+
         try {
             fout =openFileOutput(filenme,MODE_PRIVATE);
         } catch (IOException e) {
@@ -101,16 +110,20 @@ public class SensorActivity extends Activity implements  SensorEventListener {
         int sensorType = event.sensor.getType();
         long curtime=System.currentTimeMillis();
         String  curTimeStr=String.valueOf(curtime);
+        float[] rotate = new float[9];
+        float[] temp = new float[3];
         switch (sensorType) {
             case Sensor.TYPE_ACCELEROMETER:
                 x = event.values[0];
                 y = event.values[1];
                 z = event.values[2];
+                accelerometerValues = event.values;
                 break;
             case Sensor.TYPE_GRAVITY:
                 x = event.values[0];
                 y = event.values[1];
                 z = event.values[2];
+                gravityValues = event.values;
                 break;
             case Sensor.TYPE_GYROSCOPE:
                 x = event.values[0];
@@ -121,16 +134,34 @@ public class SensorActivity extends Activity implements  SensorEventListener {
                 x = event.values[0];
                 y = event.values[1];
                 z = event.values[2];
+                magneticFieldValues = event.values;
+                break;
+            case Sensor.TYPE_ORIENTATION:
+                x = event.values[0];
+                y = event.values[1];
+                z = event.values[2];
+                orientationValues = event.values;
                 break;
             case Sensor.TYPE_LINEAR_ACCELERATION:
                 x = event.values[0];
                 y = event.values[1];
                 z = event.values[2];
+                linearAccelerometerValues = event.values;
+                //线性加速度手机坐标系转地面坐标系
+                SensorManager.getRotationMatrix(rotate, null, gravityValues, magneticFieldValues);
+                temp[0] = rotate[0]*linearAccelerometerValues[0]+rotate[1]*linearAccelerometerValues[1]+rotate[2]*linearAccelerometerValues[2];
+                temp[1] = rotate[3]*linearAccelerometerValues[0]+rotate[4]*linearAccelerometerValues[1]+rotate[5]*linearAccelerometerValues[2];
+                temp[2] = rotate[6]*linearAccelerometerValues[0]+rotate[7]*linearAccelerometerValues[1]+rotate[8]*linearAccelerometerValues[2];
                 break;
             default:
                 return;
         }
-        String message = sensorType + "," + curTimeStr + "," + x + "," + y + "," + z + "\n";
+        String message = sensorType + "," + curTimeStr + "," + event.values.length+ "," +x + "," + y + "," + z + "\n";
+        Log.d("SysT",sensorType + "," + curTimeStr + "," +event.timestamp + "," + x + "," + y + "," + z + "\n");
+        if(sensorType == Sensor.TYPE_LINEAR_ACCELERATION)
+        {
+            message += '0' + "," + curTimeStr + "," + 3 + "," + temp[0] + "," + temp[1] + "," + temp[2] + "\n";
+        }
         try {
             fout.write(message.getBytes());
         } catch (IOException e) {
@@ -163,75 +194,4 @@ public class SensorActivity extends Activity implements  SensorEventListener {
         }
     }
 
-//    class  ClientThread extends Thread {
-//        String str;
-//        Socket socket;
-//        PrintStream output;
-//
-//        public ClientThread (String str) {
-//            this.str = str;
-//        }
-//
-//        @Override
-//        public void run() {
-//
-//
-////            Message ms = myHandler.obtainMessage();
-////            Bundle bundle = new Bundle();
-////            bundle.clear();
-//
-//
-//
-//
-//            try {
-//                socket = new Socket();
-//                socket.connect(new InetSocketAddress(HOST,PORT),5000);
-//
-//               //in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//                output = new PrintStream(socket.getOutputStream());
-//                output.println(str);
-//                Log.e("str",str);
-//                output.flush();
-//  //              String line = null;
-////                buffer = "";
-////                while ((line = in.readLine()) != null) {
-////                    buffer = buffer + line;
-////                    if(buffer!=null) {
-////                        bundle.putString("newcontent",buffer);
-////                        ms.setData(bundle);
-////                        myHandler.sendMessage(ms);
-////                    }
-////                }
-//            }
-//            catch (SocketTimeoutException aa)
-//            {
-////                bundle.putString("newcontent","There is Timeout");
-////                ms.setData(bundle);
-////                myHandler.sendMessage(ms);
-//
-//            }
-//            catch (IOException e) {
-//
-////                bundle.putString("newcontent","There is IOEX");
-////                ms.setData(bundle);
-////                myHandler.sendMessage(ms);
-//
-//            }
-//
-//            try {
-//a
-//                output.close();
-//                //writer.close();
-//                //in.close();
-//                socket.close();
-//            }
-//            catch (IOException e) {
-////                bundle.putString("newcontent","There is IOEX close");
-////                ms.setData(bundle);
-////                myHandler.sendMessage(ms);
-//
-//            }
-//        }
-//
-//    }
 }
